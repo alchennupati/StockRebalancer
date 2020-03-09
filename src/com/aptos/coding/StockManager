@@ -2,11 +2,10 @@ package com.aptos.coding;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
-
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.OkHttpClient;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,20 +15,12 @@ import okhttp3.ConnectionSpec;
 import okhttp3.TlsVersion;
 import okhttp3.CipherSuite;
 import okhttp3.CertificatePinner;
-import javax.net.ssl.SSLException;
-
-import javax.net.ssl.SSLContext;
-
-
 import okhttp3.ConnectionSpec.Builder;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.OkHttpClient;
-import org.w3c.dom.Document;
 
 
 public class StockManager {
 
+	// Desired stocks and percentages
 	private static final Map<String, Integer> PORTFOLIO_PERCENTAGE = new HashMap<>();
 
 	static {
@@ -144,7 +135,7 @@ public class StockManager {
 					execute(OP.SELL, symbol, stocksToSell);
 				}
 			}else{
-				// Not in the initial original list, however, in the desired list
+				// Not in the initial list, however, there in the desired list
 				int stocksToSell = symbolStock.getShares();
 				if(stocksToSell > 0)
 					execute(OP.SELL, symbol, stocksToSell);
@@ -152,7 +143,7 @@ public class StockManager {
 
 		}
 
-		// Execute Buy or Sell
+		// Execute Buy or Sell operation
 		private static void execute(OP op, String symbol, int quantity) {
 			switch (op) {
 			case BUY:
@@ -191,8 +182,9 @@ public class StockManager {
 			this.actualPortfolioPercentage = actualPortfolioPercentage;
 		}
 		
+		// Value in amount
 		public double getValue() {
-	        return this.price * this.shares;
+	          return this.price * this.shares;
 	    }
 
 		public String getSymbol() {
@@ -256,38 +248,38 @@ public class StockManager {
 
 	}
 
-	// OKHttp Client
-	public final static class HttpUtil{
-		private static final String url = "https://www.alphavantage.co/query?apikey=BPYXEC00NPEI4YSY&function=TIME_SERIES_DAILY_ADJUSTED";
+   // OKHttp Client
+   public final static class HttpUtil{
+       private static final String url = "https://www.alphavantage.co/query?apikey=BPYXEC00NPEI4YSY&function=TIME_SERIES_DAILY_ADJUSTED";
 
-		static final OkHttpClient client = new OkHttpClient.Builder()
+	static final OkHttpClient client = new OkHttpClient.Builder()
 	    .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
 	    .build();
 
-		public static  double run(String symbol)  {
-		        try {
-		            Request request = new Request.Builder()
-		        	         .url(url+"&symbol="+symbol)
-		                    .build();                
-		            Response response = client.newCall(request).execute();
-		            String output = response.body().string();
-					ObjectMapper mapper = new ObjectMapper();
-					// convert JSON string to Map
-					Map<String, String> map = mapper.readValue(output, Map.class);
-					Map<String, Object> object = mapper.readValue(output, new TypeReference<Map<String,Object>>(){});
-					for(Map.Entry<String, Object> entry : object.entrySet()){
-						if(entry.getKey().equalsIgnoreCase("Time Series (Daily)")){
-							String stockpriceInfo = entry.getValue().toString();
-							double currentPrice = Double.parseDouble(stockpriceInfo.substring(stockpriceInfo.indexOf("close=")+6,stockpriceInfo.indexOf(", 5. adjusted close=")));
-							return currentPrice;
-						}
-					}
-		            return 0.0;
-		        } catch (java.io.IOException e) { 
-		        	System.out.println("respone"+ e.toString());
-		            return 0.0;
-		        }
+         public static  double run(String symbol)  {
+	   try {
+		    Request request = new Request.Builder()
+				 .url(url+"&symbol="+symbol)
+			    .build();                
+		    Response response = client.newCall(request).execute();
+		    String output = response.body().string();
+		    ObjectMapper mapper = new ObjectMapper();
+		    // convert JSON string to Map
+		    Map<String, String> map = mapper.readValue(output, Map.class);
+		    Map<String, Object> object = mapper.readValue(output, new TypeReference<Map<String,Object>>(){});
+		    for(Map.Entry<String, Object> entry : object.entrySet()){
+			if(entry.getKey().equalsIgnoreCase("Time Series (Daily)")){
+				String stockpriceInfo = entry.getValue().toString();
+				double currentPrice = Double.parseDouble(stockpriceInfo.substring(stockpriceInfo.indexOf("close=")+6,stockpriceInfo.indexOf(", 5. adjusted close=")));
+				return currentPrice;
+			}
 		    }
+		    return 0.0;
+		} catch (java.io.IOException e) { 
+		    System.out.println("respone"+ e.toString());
+		    return 0.0;
+		}
+	    }
 	}
 	 
 	 
