@@ -130,7 +130,7 @@ public class StockManager {
 					if(symbolStock.getPrice() > 0.0)
 						 stocksToBuy = (int) (deficitValue / symbolStock.getPrice());
 					else
-						stocksToBuy = (int) (deficitValue; //Exception scenario when no stock price available. Assuming price 1, cash?
+						stocksToBuy = (int) (deficitValue); //Exception scenario when no stock price available. Assuming price 1, cash?
 					System.out.println(" stocksToBuy "+stocksToBuy);
 					execute(OP.BUY, symbol, stocksToBuy);
 	
